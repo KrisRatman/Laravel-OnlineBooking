@@ -4,6 +4,8 @@
 
 Подходит салонам красоты, барбершопам, клиникам, репетиторам и студиям — всем, кто работает по записи.
 
+**[Открыть демо](https://round-shadow-07bd.mkeyboard138.workers.dev/)** · [админка](https://round-shadow-07bd.mkeyboard138.workers.dev/admin) (`admin@example.com` / `password`)
+
 ![Публичная страница записи](docs/screenshots/02-booking-form.png)
 
 ## Возможности
@@ -36,9 +38,11 @@
 |---|---|---|
 | ![Список записей](docs/screenshots/08-appointments.png) | ![График мастера](docs/screenshots/09-staff.png) | ![Новая запись](docs/screenshots/10-create.png) |
 
-## Демо-доступ
+## Демо
 
-Админка: `/admin`, логин `admin@example.com`, пароль `password` (в демо-режиме форма входа заполнена сама).
+- Страница записи: https://round-shadow-07bd.mkeyboard138.workers.dev/
+- Админка: https://round-shadow-07bd.mkeyboard138.workers.dev/admin — логин `admin@example.com`, пароль `password` (форма входа заполнена сама).
+- Бот напоминаний: [@BookingLaraBot](https://t.me/BookingLaraBot) — подключается кнопкой на странице записи.
 
 Демо-данные: студия красоты с 4 мастерами, 7 услугами и примерно 300 записями на две недели назад и вперёд.
 
