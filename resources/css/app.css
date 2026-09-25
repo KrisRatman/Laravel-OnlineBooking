@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Фирменный цвет студии: спокойный зелёный «ясень». */
+    --color-brand-50: #f0f7f4;
+    --color-brand-100: #dcede5;
+    --color-brand-200: #bbdbcc;
+    --color-brand-300: #8ec1ab;
+    --color-brand-400: #5fa287;
+    --color-brand-500: #3f866c;
+    --color-brand-600: #2e6b56;
+    --color-brand-700: #265647;
+    --color-brand-800: #21463a;
+    --color-brand-900: #1c3a31;
+}
+
+[x-cloak] {
+    display: none !important;
+}
