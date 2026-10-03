@@ -20,5 +20,7 @@ final readonly class BookingRequest
         // Администратор записал клиента по телефону: можно сразу подтвердить, коллег не оповещать.
         public bool $confirmed = false,
         public bool $fromAdmin = false,
+        // Клиент вошёл в личный кабинет: телефон его, контакты можно обновить.
+        public bool $authenticated = false,
     ) {}
 }

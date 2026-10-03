@@ -53,7 +53,15 @@ class TelegramWebhookController extends Controller
             return 'Запись не найдена. Откройте ссылку со страницы записи ещё раз.';
         }
 
-        $appointment->client->update(['telegram_chat_id' => $chatId]);
+        $client = $appointment->client;
+
+        // Через Telegram приходят коды входа в кабинет: чужой чат не заменяет уже привязанный.
+        if (filled($client->telegram_chat_id) && $client->telegram_chat_id !== $chatId) {
+            return 'К этому номеру телефона уже подключён другой Telegram. '
+                .'Отключите его в личном кабинете или обратитесь в студию.';
+        }
+
+        $client->update(['telegram_chat_id' => $chatId]);
 
         $when = $appointment->localStartsAt()->locale('ru')->isoFormat('D MMMM, HH:mm');
 

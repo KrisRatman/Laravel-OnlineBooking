@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Actions\BookAppointment;
 use App\Actions\BookingRequest;
 use App\Exceptions\SlotUnavailableException;
+use App\Models\Client;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Services\Slots\SlotService;
@@ -13,6 +14,7 @@ use App\Support\Phone;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -65,6 +67,13 @@ class BookingWizard extends Component
         }
 
         $this->date = $this->dates[0] ?? null;
+
+        // Клиент вошёл в кабинет — контакты уже известны.
+        if ($client = $this->client()) {
+            $this->name = $client->name;
+            $this->phone = $client->formattedPhone();
+            $this->email = (string) $client->email;
+        }
     }
 
     public function selectService(int $serviceId): void
@@ -147,6 +156,7 @@ class BookingWizard extends Component
                 phone: Phone::normalize($this->phone),
                 email: filled($this->email) ? trim($this->email) : null,
                 comment: filled($this->comment) ? trim($this->comment) : null,
+                authenticated: $this->client()?->phone === Phone::normalize($this->phone),
             ));
         } catch (SlotUnavailableException $e) {
             $this->startsAt = null;
@@ -294,6 +304,11 @@ class BookingWizard extends Component
         }
 
         return $this->selectedStaff ? $slots->availableSlots($this->service, $this->selectedStaff, $date) : [];
+    }
+
+    private function client(): ?Client
+    {
+        return Auth::guard('client')->user();
     }
 
     private function isValidStaff(string $staff): bool

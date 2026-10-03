@@ -174,3 +174,22 @@ it('ограничивает частоту записей с одного ад�
 
     expect(Appointment::count())->toBe(0);
 });
+
+it('подставляет контакты вошедшего клиента и обновляет его email', function () {
+    $client = Client::factory()->create(['name' => 'Ольга', 'phone' => '+79161234567', 'email' => 'old@example.com']);
+    $this->actingAs($client, 'client');
+
+    Livewire::test(BookingWizard::class)
+        ->assertSet('name', 'Ольга')
+        ->assertSet('phone', '+7 (916) 123-45-67')
+        ->assertSet('email', 'old@example.com')
+        ->call('selectService', $this->service->id)
+        ->call('selectStaff', (string) $this->anna->id)
+        ->call('selectDate', '2026-10-01')
+        ->call('selectSlot', moscow('11:00')->getTimestamp())
+        ->set('email', 'new@example.com')
+        ->call('book');
+
+    expect(Appointment::sole()->client_id)->toBe($client->id)
+        ->and($client->fresh()->email)->toBe('new@example.com');
+});

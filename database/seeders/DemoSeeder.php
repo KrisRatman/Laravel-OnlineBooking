@@ -85,10 +85,17 @@ class DemoSeeder extends Seeder
             'type' => ScheduleExceptionType::CustomHours, 'starts_at' => '11:00', 'ends_at' => '16:00', 'note' => 'Короткий день',
         ]);
 
+        // Первая клиентка — демо-доступ в личный кабинет («Войти как демо-клиент»).
         $clients = collect(self::CLIENTS)->map(fn (string $name, int $i) => Client::create([
             'name' => $name,
-            'phone' => '+7916'.str_pad((string) (1000000 + $i * 7919 % 9000000), 7, '0', STR_PAD_LEFT),
-            'email' => $i % 3 === 0 ? null : 'client'.($i + 1).'@example.com',
+            'phone' => $i === 0
+                ? config('booking.demo.client_phone')
+                : '+7916'.str_pad((string) (1000000 + $i * 7919 % 9000000), 7, '0', STR_PAD_LEFT),
+            'email' => match (true) {
+                $i === 0 => 'olga@example.com',
+                $i % 3 === 0 => null,
+                default => 'client'.($i + 1).'@example.com',
+            },
         ]));
 
         foreach (range(-14, 14) as $offset) {
@@ -96,6 +103,8 @@ class DemoSeeder extends Seeder
                 $this->fillDay($member, $today->addDays($offset), $clients->all());
             }
         }
+
+        $this->giveDemoClientHistory($clients->first());
 
         // Пара свежих уведомлений в колокольчике админки.
         Appointment::query()->where('status', AppointmentStatus::New)->where('starts_at', '>', now())
@@ -127,6 +136,20 @@ class DemoSeeder extends Seeder
         }
 
         return $member;
+    }
+
+    /**
+     * Клиенты раскиданы по записям случайно. Демо-клиентке отдаём несколько визитов в прошлом
+     * и пару записей впереди (не раньше чем через сутки), чтобы в кабинете было что отменить и перенести.
+     */
+    private function giveDemoClientHistory(Client $demo): void
+    {
+        $completed = Appointment::query()->where('status', AppointmentStatus::Completed)->orderBy('starts_at')->get();
+        $upcoming = Appointment::query()->active()->where('starts_at', '>', now()->addDay())->orderBy('starts_at')->get();
+
+        $completed->nth(intdiv($completed->count(), 6) ?: 1)
+            ->merge($upcoming->nth(intdiv($upcoming->count(), 2) ?: 1, 3)->take(2))
+            ->each(fn (Appointment $appointment) => $appointment->update(['client_id' => $demo->id]));
     }
 
     /** @param list<Client> $clients */

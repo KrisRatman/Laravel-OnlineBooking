@@ -47,10 +47,16 @@ class BookAppointment
 
             $offer = $staff->offer($service);
 
-            $client = Client::query()->updateOrCreate(
-                ['phone' => $request->phone],
-                array_filter(['name' => $request->name, 'email' => $request->email]),
-            );
+            $client = Client::query()->firstOrNew(['phone' => $request->phone]);
+            $client->name = $request->name;
+
+            // Телефон в анонимной форме не подтверждён. Email из неё не заменяет сохранённый —
+            // иначе любой, кто знает чужой номер, получал бы коды входа в чужой кабинет.
+            if ($request->email !== null && (blank($client->email) || $request->fromAdmin || $request->authenticated)) {
+                $client->email = $request->email;
+            }
+
+            $client->save();
 
             return Appointment::create([
                 'client_id' => $client->id,

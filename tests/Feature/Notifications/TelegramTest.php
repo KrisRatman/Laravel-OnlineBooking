@@ -65,3 +65,21 @@ it('не отправляет в Telegram без токена бота', functio
 
     Http::assertNothingSent();
 });
+
+it('не заменяет уже привязанный чат клиента чужим', function () {
+    $this->appointment->client->update(['telegram_chat_id' => '777']);
+
+    webhook('/start '.$this->appointment->token, chatId: 555)->assertNoContent();
+
+    expect($this->appointment->client->fresh()->telegram_chat_id)->toBe('777');
+    Http::assertSent(fn (Request $request) => $request['chat_id'] === '555'
+        && str_contains($request['text'], 'уже подключён другой Telegram'));
+});
+
+it('повторный /start из того же чата проходит', function () {
+    $this->appointment->client->update(['telegram_chat_id' => '555']);
+
+    webhook('/start '.$this->appointment->token, chatId: 555)->assertNoContent();
+
+    Http::assertSent(fn (Request $request) => str_contains($request['text'], 'Напомним о записи'));
+});

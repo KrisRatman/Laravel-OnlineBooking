@@ -2,6 +2,7 @@
 
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\Client;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 
@@ -30,6 +31,18 @@ it('создаёт демо-студию с записями без пересе
                     ->toBeTrue("Пересечение записей #{$previous->id} и #{$next->id}");
             });
         });
+});
+
+it('даёт демо-клиенту историю визитов и записи, которые можно перенести', function () {
+    $this->seed(DemoSeeder::class);
+
+    $demo = Client::where('phone', config('booking.demo.client_phone'))->sole();
+
+    expect($demo->email)->not->toBeNull()
+        ->and($demo->appointments()->where('status', AppointmentStatus::Completed)->count())->toBeGreaterThanOrEqual(3)
+        ->and($demo->appointments()->active()->get())
+        ->filter(fn (Appointment $appointment) => $appointment->canBeRescheduledByClient())
+        ->count()->toBeGreaterThanOrEqual(2);
 });
 
 it('повторный запуск ничего не дублирует', function () {

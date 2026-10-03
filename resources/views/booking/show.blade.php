@@ -2,12 +2,6 @@
     use App\Enums\AppointmentStatus;
 
     $start = $appointment->localStartsAt()->locale('ru');
-    $badge = match ($appointment->status) {
-        AppointmentStatus::New => 'bg-amber-100 text-amber-800',
-        AppointmentStatus::Confirmed => 'bg-emerald-100 text-emerald-800',
-        AppointmentStatus::Cancelled => 'bg-rose-100 text-rose-800',
-        AppointmentStatus::Completed => 'bg-stone-100 text-stone-700',
-    };
 @endphp
 
 <x-layout title="Ваша запись">
@@ -38,7 +32,7 @@
                     <div class="text-sm text-stone-500">Запись</div>
                     <h1 class="text-2xl font-extrabold tracking-tight">{{ $appointment->service->name }}</h1>
                 </div>
-                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $badge }}">{{ $appointment->status->getLabel() }}</span>
+                <x-booking.status-badge :status="$appointment->status" />
             </div>
 
             <dl class="mt-6 grid gap-4 sm:grid-cols-2">
@@ -96,6 +90,9 @@
             </details>
         @endif
 
-        <a href="{{ route('home') }}" class="block text-center text-sm font-semibold text-brand-700 hover:text-brand-900">Записаться ещё</a>
+        <div class="flex justify-center gap-6 text-sm font-semibold">
+            <a href="{{ route('home') }}" class="text-brand-700 hover:text-brand-900">Записаться ещё</a>
+            <a href="{{ route('cabinet') }}" class="text-brand-700 hover:text-brand-900">Все мои записи</a>
+        </div>
     </div>
 </x-layout>

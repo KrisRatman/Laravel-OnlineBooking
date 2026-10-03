@@ -28,9 +28,17 @@
                     <span class="block text-xs text-stone-500">{{ $business['address'] }}</span>
                 </span>
             </a>
-            <a href="tel:{{ preg_replace('/[^\d+]/', '', $business['phone']) }}" class="hidden text-sm font-semibold text-brand-700 hover:text-brand-900 sm:block">
-                {{ $business['phone'] }}
-            </a>
+            <div class="flex shrink-0 items-center gap-5">
+                <a href="tel:{{ preg_replace('/[^\d+]/', '', $business['phone']) }}" class="hidden text-sm font-semibold text-brand-700 hover:text-brand-900 sm:block">
+                    {{ $business['phone'] }}
+                </a>
+                <a href="{{ route('cabinet') }}" class="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border border-stone-200 px-3 py-2 text-sm font-semibold text-stone-700 transition hover:border-brand-400 hover:text-brand-800">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />
+                    </svg>
+                    {{ auth('client')->check() ? 'Мои записи' : 'Войти' }}
+                </a>
+            </div>
         </div>
     </header>
 

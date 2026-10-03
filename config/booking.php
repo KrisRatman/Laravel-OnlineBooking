@@ -35,17 +35,30 @@ return [
     // На сколько дней вперёд открыта запись.
     'horizon_days' => (int) env('BOOKING_HORIZON_DAYS', 30),
 
+    // Клиент сам отменяет или переносит запись не позже, чем за столько минут до начала.
+    'client_change_deadline_minutes' => (int) env('BOOKING_CLIENT_CHANGE_DEADLINE', 60),
+
+    // Вход в личный кабинет по одноразовому коду.
+    'login_code' => [
+        'ttl_minutes' => 10,
+        'max_attempts' => 5,
+        // Сколько кодов можно запросить на один номер за 10 минут.
+        'per_phone' => 3,
+    ],
+
     // Напоминания: за сколько минут до начала записи.
     'reminders' => [
         'day' => 24 * 60,
         'hours' => 2 * 60,
     ],
 
-    // Демо для портфолио: форма входа в админку заполнена этим доступом.
+    // Демо для портфолио: форма входа в админку заполнена этим доступом,
+    // а в личный кабинет можно войти демо-клиентом без кода.
     'demo' => [
         'enabled' => (bool) env('BOOKING_DEMO', false),
         'email' => env('BOOKING_DEMO_EMAIL', 'admin@example.com'),
         'password' => env('BOOKING_DEMO_PASSWORD', 'password'),
+        'client_phone' => env('BOOKING_DEMO_CLIENT_PHONE', '+79161000000'),
     ],
 
     // Разбирать очередь через планировщик (виртуальный хостинг без supervisor).

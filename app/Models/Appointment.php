@@ -107,10 +107,17 @@ class Appointment extends Model implements Eventable
         return (int) $this->starts_at->diffInMinutes($this->ends_at);
     }
 
-    /** Клиент может отменить запись сам, пока она активна и ещё не началась. */
+    /** Клиент может отменить запись сам, пока она активна и до начала не меньше заданного запаса. */
     public function canBeCancelledByClient(?CarbonInterface $now = null): bool
     {
-        return $this->status->isActive() && $this->starts_at->isAfter($now ?? now());
+        return $this->status->isActive()
+            && $this->starts_at->subMinutes(config('booking.client_change_deadline_minutes'))->greaterThanOrEqualTo($now ?? now());
+    }
+
+    /** Перенос из личного кабинета — по тем же правилам, что и отмена. */
+    public function canBeRescheduledByClient(?CarbonInterface $now = null): bool
+    {
+        return $this->canBeCancelledByClient($now);
     }
 
     public function toCalendarEvent(): CalendarEvent

@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Telegram подписывает webhook секретным заголовком, CSRF-токена у него нет.
         $middleware->preventRequestForgery(except: ['telegram/webhook']);
+
+        // Админка Filament перенаправляет на свой вход сама; эти правила — для личного кабинета.
+        $middleware->redirectGuestsTo(fn () => route('cabinet.login'));
+        $middleware->redirectUsersTo(fn () => route('cabinet'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

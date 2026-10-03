@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * Администратор студии: в users только сотрудники с доступом в админку.
- * Клиенты живут отдельно, в clients, и входить им не нужно.
+ * Клиенты живут отдельно, в clients, и входят в личный кабинет через guard «client».
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]

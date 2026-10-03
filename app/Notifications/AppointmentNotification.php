@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\Appointment;
 use App\Models\Client;
-use App\Notifications\Channels\TelegramChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -39,10 +38,7 @@ abstract class AppointmentNotification extends Notification implements ShouldQue
     /** @return list<string> */
     public function via(Client $notifiable): array
     {
-        return array_values(array_filter([
-            filled($notifiable->email) ? 'mail' : null,
-            filled($notifiable->telegram_chat_id) ? TelegramChannel::class : null,
-        ]));
+        return $notifiable->notificationChannels();
     }
 
     public function toMail(Client $notifiable): MailMessage

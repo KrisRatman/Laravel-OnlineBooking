@@ -25,6 +25,8 @@
         <env name="BOOKING_SLOT_STEP" value="15" force="true"/>
         <env name="BOOKING_MIN_LEAD_MINUTES" value="60" force="true"/>
         <env name="BOOKING_HORIZON_DAYS" value="30" force="true"/>
+        <env name="BOOKING_CLIENT_CHANGE_DEADLINE" value="60" force="true"/>
+        <env name="BOOKING_DEMO" value="false" force="true"/>
         <env name="TELEGRAM_BOT_TOKEN" value="test-token" force="true"/>
         <env name="TELEGRAM_BOT_USERNAME" value="demo_booking_bot" force="true"/>
         <env name="TELEGRAM_WEBHOOK_SECRET" value="test-secret" force="true"/>

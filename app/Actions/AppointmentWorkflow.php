@@ -9,6 +9,7 @@ use App\Models\Appointment;
 use App\Models\Staff;
 use App\Models\User;
 use App\Notifications\Admin\AppointmentCancelledByClient;
+use App\Notifications\Admin\AppointmentRescheduledByClient;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentConfirmed;
 use App\Notifications\AppointmentRescheduled;
@@ -56,16 +57,17 @@ class AppointmentWorkflow
 
     /**
      * Перенос на другое время или к другому мастеру. Проверка — как при новой записи.
+     * Если перенёс клиент, запись снова ждёт подтверждения, а администраторы получают оповещение.
      *
      * @throws SlotUnavailableException
      */
-    public function reschedule(Appointment $appointment, int $staffId, CarbonImmutable $startsAt): void
+    public function reschedule(Appointment $appointment, int $staffId, CarbonImmutable $startsAt, bool $byClient = false): void
     {
         if (! $appointment->status->isActive()) {
             throw new InvalidStatusTransitionException($appointment->status, $appointment->status);
         }
 
-        DB::transaction(function () use ($appointment, $staffId, $startsAt) {
+        DB::transaction(function () use ($appointment, $staffId, $startsAt, $byClient) {
             $staff = Staff::query()->whereKey($staffId)->lockForUpdate()->firstOrFail();
 
             if (! $this->slots->isAvailable($appointment->service, $staff, $startsAt, ignoreAppointmentId: $appointment->id)) {
@@ -83,10 +85,15 @@ class AppointmentWorkflow
                 // Время изменилось — напоминания нужно отправить заново.
                 'reminder_day_sent_at' => null,
                 'reminder_hours_sent_at' => null,
+                ...($byClient ? ['status' => AppointmentStatus::New, 'confirmed_at' => null] : []),
             ]);
         });
 
         $appointment->client->notify(new AppointmentRescheduled($appointment->fresh()));
+
+        if ($byClient) {
+            Notification::send(User::all(), new AppointmentRescheduledByClient($appointment));
+        }
     }
 
     /**

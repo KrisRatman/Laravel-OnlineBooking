@@ -1,11 +1,3 @@
-@php
-    $groups = collect($this->availableTimes)->groupBy(function (string $time) {
-        $hour = (int) substr($time, 0, 2);
-
-        return $hour < 12 ? 'Утро' : ($hour < 17 ? 'День' : 'Вечер');
-    }, preserveKeys: true);
-@endphp
-
 <div class="grid gap-8 lg:grid-cols-[1fr_22rem]">
     <div class="min-w-0 space-y-6">
         <div>
@@ -106,23 +98,8 @@
             <section class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
                 <x-booking.step-heading number="3" title="Дата и время" :done="$startsAt !== null" />
 
-                <div class="-mx-5 mt-4 overflow-x-auto px-5 pb-2">
-                    <div class="flex gap-2">
-                        @foreach ($this->dates as $day)
-                            @php($d = \Carbon\CarbonImmutable::parse($day)->locale('ru'))
-                            <button type="button" data-date="{{ $day }}" wire:key="date-{{ $day }}" wire:click="selectDate('{{ $day }}')"
-                                    @class([
-                                        'flex w-14 shrink-0 flex-col items-center rounded-xl border py-2 transition',
-                                        'border-brand-600 bg-brand-600 text-white' => $day === $date,
-                                        'border-stone-200 hover:border-brand-400' => $day !== $date,
-                                        'text-rose-500' => $day !== $date && $d->isWeekend(),
-                                    ])>
-                                <span class="text-xs uppercase">{{ $d->isoFormat('dd') }}</span>
-                                <span class="text-lg font-bold leading-tight">{{ $d->day }}</span>
-                                <span @class(['text-[11px]', 'text-stone-400' => $day !== $date])>{{ $d->isoFormat('MMM') }}</span>
-                            </button>
-                        @endforeach
-                    </div>
+                <div class="mt-4">
+                    <x-booking.date-strip :dates="$this->dates" :selected="$date" />
                 </div>
 
                 <div class="relative mt-4 min-h-24">
@@ -134,7 +111,7 @@
                         <div class="mb-4 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ $message }}</div>
                     @enderror
 
-                    @if ($groups->isEmpty())
+                    @if ($this->availableTimes === [])
                         <div class="rounded-xl bg-stone-50 px-4 py-6 text-center">
                             <p class="text-stone-600">На этот день свободного времени нет.</p>
                             @if ($nearest = $this->nearestAvailableDate())
@@ -144,25 +121,7 @@
                             @endif
                         </div>
                     @else
-                        <div class="space-y-4">
-                            @foreach ($groups as $label => $times)
-                                <div>
-                                    <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-400">{{ $label }}</div>
-                                    <div class="grid grid-cols-4 gap-2 sm:grid-cols-6">
-                                        @foreach ($times as $timestamp => $time)
-                                            <button type="button" data-slot="{{ $time }}" wire:key="slot-{{ $timestamp }}" wire:click="selectSlot({{ $timestamp }})"
-                                                    @class([
-                                                        'rounded-lg border py-2 text-sm font-semibold transition',
-                                                        'border-brand-600 bg-brand-600 text-white' => $startsAt === $timestamp,
-                                                        'border-stone-200 hover:border-brand-400 hover:bg-brand-50' => $startsAt !== $timestamp,
-                                                    ])>
-                                                {{ $time }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                        <x-booking.time-slots :times="$this->availableTimes" :selected="$startsAt" />
                     @endif
                 </div>
             </section>

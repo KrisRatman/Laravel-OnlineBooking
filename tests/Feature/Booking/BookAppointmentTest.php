@@ -106,3 +106,27 @@ it('запись из админки можно сразу подтвердит�
     Notification::assertNotSentTo($appointment->client, AppointmentBooked::class);
     Notification::assertNotSentTo($this->admin, NewAppointmentForAdmin::class);
 });
+
+it('анонимная запись не заменяет сохранённый email клиента, но заполняет пустой', function () {
+    $client = Client::factory()->create(['phone' => '+79161234567', 'email' => 'owner@example.com']);
+
+    app(BookAppointment::class)->handle(bookingRequest($this->service, $this->staff, moscow('11:00'), ['email' => 'stranger@example.com']));
+
+    expect($client->fresh()->email)->toBe('owner@example.com');
+
+    $client->update(['email' => null]);
+    app(BookAppointment::class)->handle(bookingRequest($this->service, $this->staff, moscow('13:00'), ['email' => 'new@example.com']));
+
+    expect($client->fresh()->email)->toBe('new@example.com');
+});
+
+it('вошедший клиент и администратор могут обновить email', function (array $flags) {
+    $client = Client::factory()->create(['phone' => '+79161234567', 'email' => 'old@example.com']);
+
+    app(BookAppointment::class)->handle(bookingRequest($this->service, $this->staff, moscow('11:00'), ['email' => 'new@example.com', ...$flags]));
+
+    expect($client->fresh()->email)->toBe('new@example.com');
+})->with([
+    'клиент в кабинете' => [['authenticated' => true]],
+    'администратор' => [['fromAdmin' => true]],
+]);
